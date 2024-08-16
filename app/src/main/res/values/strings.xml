@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">photoapp</string>
+    <string name="app_name">Photo App</string>
+    <string name="keyword">keyword</string>
+    <string name="search">Search</string>
 </resources>
