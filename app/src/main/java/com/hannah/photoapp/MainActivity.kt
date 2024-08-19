@@ -1,5 +1,7 @@
 package com.hannah.photoapp
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -14,9 +16,11 @@ import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
     private val API_KEY = "TCWmoJU5NImbuUu28hDmP5tJJVodarAfh8HkNma9iSQJ4JOdXBF9JOE0"
@@ -27,6 +31,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerview: RecyclerView
     private val handler = Handler(Looper.getMainLooper())
     private val picturesFromAPI: ArrayList<PictureData> = ArrayList()
+    private val newIndices: ArrayList<Int> = ArrayList()
+    private val cachedThreadPoolExecutor = Executors.newCachedThreadPool()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +53,11 @@ class MainActivity : AppCompatActivity() {
                 progressBar.visibility = View.VISIBLE
             }
             loadDataFromAPI("https://api.pexels.com/v1/curated?page=1&per_page=15")
+            loadImageFromAPI()
+            for (i in 0 until picturesFromAPI.size) {
+
+                Log.d("AAA","{${picturesFromAPI[i].id}}, ${picturesFromAPI[i].medium}, ${picturesFromAPI[i].photographer}, ${picturesFromAPI[i].realImage}" )
+            }
             handler.post {
                 progressBar.visibility = View.INVISIBLE
             }
@@ -76,6 +87,7 @@ class MainActivity : AppCompatActivity() {
                         null
                     )
                 )
+                newIndices.add(picturesFromAPI.size - 1)
             }
             inputStreamReader.close()
             bufferedReader.close()
@@ -84,5 +96,19 @@ class MainActivity : AppCompatActivity() {
         }catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun loadImageFromAPI() {
+        for (i in newIndices) {
+            cachedThreadPoolExecutor.execute {
+                try {
+                    val inputStream: InputStream = URL(picturesFromAPI[i].medium).openStream()
+                    picturesFromAPI[i].realImage = BitmapFactory.decodeStream(inputStream)
+                }catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        newIndices.clear()
     }
 }
