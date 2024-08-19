@@ -11,6 +11,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -25,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerview: RecyclerView
     private val handler = Handler(Looper.getMainLooper())
+    private val picturesFromAPI: ArrayList<PictureData> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +64,22 @@ class MainActivity : AppCompatActivity() {
             val inputStreamReader = InputStreamReader(connection.inputStream, "UTF-8")
             val bufferedReader = BufferedReader(inputStreamReader)
             val result = bufferedReader.readLine()
-            Log.d("AAA", result)
+            val response = JSONObject(result)
+            val photos = response.getJSONArray("photos")
+            for (i in 0 until photos.length()) {
+                val photo = photos.getJSONObject(i)
+                picturesFromAPI.add(
+                    PictureData(
+                        photo.getString("id"),
+                        photo.getString("photographer"),
+                        photo.getJSONObject("src").getString("medium"),
+                        null
+                    )
+                )
+            }
+            inputStreamReader.close()
+            bufferedReader.close()
+            connection.disconnect()
 
         }catch (e: Exception) {
             e.printStackTrace()
