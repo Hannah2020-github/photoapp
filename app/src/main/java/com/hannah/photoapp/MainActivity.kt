@@ -51,16 +51,17 @@ class MainActivity : AppCompatActivity() {
 
         Thread {
             handler.post {
+                searchBtn.isEnabled = false
                 progressBar.visibility = View.VISIBLE
             }
             loadDataFromAPI("https://api.pexels.com/v1/curated?page=1&per_page=15")
             loadImageFromAPI()
-            for (i in 0 until picturesFromAPI.size) {
-
-                Log.d("AAA","{${picturesFromAPI[i].id}}, ${picturesFromAPI[i].medium}, ${picturesFromAPI[i].photographer}, ${picturesFromAPI[i].realImage}" )
-            }
+//            for (i in 0 until picturesFromAPI.size) {
+//                Log.d("AAA","{${picturesFromAPI[i].id}}, ${picturesFromAPI[i].medium}, ${picturesFromAPI[i].photographer}, ${picturesFromAPI[i].realImage}" )
+//            }
             handler.post {
                 progressBar.visibility = View.INVISIBLE
+                searchBtn.isEnabled = true
             }
         }.start()
 
