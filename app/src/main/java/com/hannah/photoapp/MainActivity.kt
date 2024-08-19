@@ -20,6 +20,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
@@ -99,15 +100,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loadImageFromAPI() {
+        val latch = CountDownLatch(newIndices.size)
         for (i in newIndices) {
             cachedThreadPoolExecutor.execute {
                 try {
                     val inputStream: InputStream = URL(picturesFromAPI[i].medium).openStream()
                     picturesFromAPI[i].realImage = BitmapFactory.decodeStream(inputStream)
+                    latch.countDown()
                 }catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
+        }
+        try {
+            latch.await()
+        }catch (e: Exception) {
+            e.printStackTrace()
         }
         newIndices.clear()
     }
