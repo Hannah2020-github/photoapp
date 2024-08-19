@@ -13,6 +13,8 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.LayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -34,6 +36,9 @@ class MainActivity : AppCompatActivity() {
     private val picturesFromAPI: ArrayList<PictureData> = ArrayList()
     private val newIndices: ArrayList<Int> = ArrayList()
     private val cachedThreadPoolExecutor = Executors.newCachedThreadPool()
+
+    private lateinit var layoutManager: LayoutManager
+    private lateinit var adapter: Adapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +65,11 @@ class MainActivity : AppCompatActivity() {
 //                Log.d("AAA","{${picturesFromAPI[i].id}}, ${picturesFromAPI[i].medium}, ${picturesFromAPI[i].photographer}, ${picturesFromAPI[i].realImage}" )
 //            }
             handler.post {
+                layoutManager = StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL)
+                adapter = Adapter(this, picturesFromAPI)
+                recyclerview.layoutManager = layoutManager
+                recyclerview.adapter = adapter
+
                 progressBar.visibility = View.INVISIBLE
                 searchBtn.isEnabled = true
             }
