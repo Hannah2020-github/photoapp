@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">圖片應用程式</string>
+    <string name="keyword">關鍵字</string>
+    <string name="search">搜尋圖片</string>
+    <string name="new_image">正在下載新圖片</string>
+</resources>

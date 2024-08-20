@@ -1,5 +1,6 @@
 package com.hannah.photoapp
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -39,6 +40,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var layoutManager: LayoutManager
     private lateinit var adapter: Adapter
+    // 需與 StaggeredGridLayoutManager 設定的 spanCount 數量一致(3)
+    private val recyclerViewBottomImageContainer = intArrayOf(0, 0, 0)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +79,34 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
 
+        recyclerview.addOnScrollListener(ScrollListener(this))
+
+    }
+
+    inner class ScrollListener(val context: Context): RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            // 類型轉換(as)成 StaggeredGridLayoutManager，才能 call findLastVisibleItemPositions()
+            val layoutManager = recyclerView.layoutManager as StaggeredGridLayoutManager
+            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPositions(recyclerViewBottomImageContainer)
+//                Log.d("AAA","${lastVisibleItemPosition[0]}")
+//                Log.d("AAA","${lastVisibleItemPosition[1]}")
+//                Log.d("AAA","${lastVisibleItemPosition[2]}")
+            val itemCount = layoutManager.itemCount
+            // 滑到圖片的最底端
+            if (lastVisibleItemPosition[0] == itemCount - 1 || lastVisibleItemPosition[1] == itemCount - 1 || lastVisibleItemPosition[2] == itemCount - 1)
+//                    Log.d("AAA","We are at the very bottom!")
+                Thread {
+                    handler.post {
+                        searchBtn.isEnabled = false
+                        progressBar.visibility = View.INVISIBLE
+                        // applicationContext 是整個 App 的 Context，運用不當，較容易發生錯誤。
+//                            Toast.makeText(applicationContext, resources.getString(R.string.new_image), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, resources.getString(R.string.new_image), Toast.LENGTH_SHORT).show()
+                    }
+                }.start()
+        }
     }
 
     fun loadDataFromAPI(url: String) {
