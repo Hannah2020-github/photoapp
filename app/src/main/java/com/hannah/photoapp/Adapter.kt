@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 class Adapter(val context: Context, val pictures: ArrayList<PictureData>): RecyclerView.Adapter<PictureViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PictureViewHolder {
         val pictureView = LayoutInflater.from(context).inflate(R.layout.picture_layout, parent, false)
-        return PictureViewHolder(pictureView)
+        return PictureViewHolder(pictureView, context)
     }
 
     override fun getItemCount(): Int {
@@ -16,6 +16,8 @@ class Adapter(val context: Context, val pictures: ArrayList<PictureData>): Recyc
     }
 
     override fun onBindViewHolder(holder: PictureViewHolder, position: Int) {
-        holder.setImageView(pictures[position].realImage!!)
+        val picture = pictures[position]
+        holder.setImageView(picture.realImage!!)
+        holder.setImageData(picture.id, picture.photographer, picture.medium)
     }
 }
