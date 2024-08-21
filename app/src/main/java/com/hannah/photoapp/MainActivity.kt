@@ -42,6 +42,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: Adapter
     // 需與 StaggeredGridLayoutManager 設定的 spanCount 數量一致(3)
     private val recyclerViewBottomImageContainer = intArrayOf(0, 0, 0)
+    private var page = 1
+    private val perPage = 15
+    private var currentSearchingText = ""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 searchBtn.isEnabled = false
                 progressBar.visibility = View.VISIBLE
             }
-            loadDataFromAPI("https://api.pexels.com/v1/curated?page=1&per_page=15")
+            loadDataFromAPI("https://api.pexels.com/v1/curated?page=1&per_page=${perPage}")
             loadImageFromAPI()
 //            for (i in 0 until picturesFromAPI.size) {
 //                Log.d("AAA","{${picturesFromAPI[i].id}}, ${picturesFromAPI[i].medium}, ${picturesFromAPI[i].photographer}, ${picturesFromAPI[i].realImage}" )
@@ -104,6 +107,19 @@ class MainActivity : AppCompatActivity() {
                         // applicationContext 是整個 App 的 Context，運用不當，較容易發生錯誤。
 //                            Toast.makeText(applicationContext, resources.getString(R.string.new_image), Toast.LENGTH_SHORT).show()
                         Toast.makeText(context, resources.getString(R.string.new_image), Toast.LENGTH_SHORT).show()
+                    }
+                    page += 1
+                    // 默認搜尋精選圖片
+                    if (currentSearchingText == "") {
+                        loadDataFromAPI("https://api.pexels.com/v1/curated?page=${page}&per_page=${perPage}")
+                    }else {
+                        loadDataFromAPI("https://api.pexels.com/v1/search?query=${currentSearchingText}&page=${page}&per_page=${perPage}")
+                    }
+                    loadImageFromAPI()
+                    handler.post {
+                        searchBtn.isEnabled = true
+                        progressBar.visibility = View.VISIBLE
+                        adapter.notifyDataSetChanged()
                     }
                 }.start()
         }
