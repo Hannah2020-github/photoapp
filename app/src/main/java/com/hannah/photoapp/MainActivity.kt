@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     private var page = 1
     private val perPage = 15
     private var currentSearchingText = ""
+    private var loadingNewImage = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,12 +99,13 @@ class MainActivity : AppCompatActivity() {
 //                Log.d("AAA","${lastVisibleItemPosition[2]}")
             val itemCount = layoutManager.itemCount
             // 滑到圖片的最底端
-            if (lastVisibleItemPosition[0] == itemCount - 1 || lastVisibleItemPosition[1] == itemCount - 1 || lastVisibleItemPosition[2] == itemCount - 1)
+            if (!loadingNewImage && (lastVisibleItemPosition[0] == itemCount - 1 || lastVisibleItemPosition[1] == itemCount - 1 || lastVisibleItemPosition[2] == itemCount - 1))
 //                    Log.d("AAA","We are at the very bottom!")
                 Thread {
                     handler.post {
+                        loadingNewImage = true
                         searchBtn.isEnabled = false
-                        progressBar.visibility = View.INVISIBLE
+                        progressBar.visibility = View.VISIBLE
                         // applicationContext 是整個 App 的 Context，運用不當，較容易發生錯誤。
 //                            Toast.makeText(applicationContext, resources.getString(R.string.new_image), Toast.LENGTH_SHORT).show()
                         Toast.makeText(context, resources.getString(R.string.new_image), Toast.LENGTH_SHORT).show()
@@ -118,8 +120,9 @@ class MainActivity : AppCompatActivity() {
                     loadImageFromAPI()
                     handler.post {
                         searchBtn.isEnabled = true
-                        progressBar.visibility = View.VISIBLE
+                        progressBar.visibility = View.INVISIBLE
                         adapter.notifyDataSetChanged()
+                        loadingNewImage = false
                     }
                 }.start()
         }
