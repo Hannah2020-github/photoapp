@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
@@ -59,7 +60,33 @@ class MainActivity : AppCompatActivity() {
         progressBar.visibility = View.INVISIBLE
 
         searchBtn.setOnClickListener {
-            Toast.makeText(this, "123~~", Toast.LENGTH_SHORT).show()
+            Thread {
+                handler.post {
+                    loadingNewImage = true
+                    searchBtn.isEnabled = false
+                    progressBar.visibility = View.VISIBLE
+                    picturesFromAPI.clear()
+                    adapter.notifyDataSetChanged()
+                    // 關閉螢幕上的鍵盤
+                    val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    inputMethodManager.hideSoftInputFromWindow(searchBtn.windowToken, 0)
+                }
+                currentSearchingText = searchText.text.toString()
+                page = 1
+                if (currentSearchingText == "") {
+                    loadDataFromAPI("https://api.pexels.com/v1/curated?page=${page}&per_page=${perPage}")
+                }else {
+                    loadDataFromAPI("https://api.pexels.com/v1/search?query=${currentSearchingText}&page=${page}&per_page=${perPage}")
+                }
+                loadImageFromAPI()
+
+                handler.post {
+                    searchBtn.isEnabled = true
+                    progressBar.visibility = View.INVISIBLE
+                    adapter.notifyDataSetChanged()
+                    loadingNewImage = false
+                }
+            }.start()
         }
 
         Thread {
@@ -98,6 +125,7 @@ class MainActivity : AppCompatActivity() {
 //                Log.d("AAA","${lastVisibleItemPosition[1]}")
 //                Log.d("AAA","${lastVisibleItemPosition[2]}")
             val itemCount = layoutManager.itemCount
+
             // 滑到圖片的最底端
             if (!loadingNewImage && (lastVisibleItemPosition[0] == itemCount - 1 || lastVisibleItemPosition[1] == itemCount - 1 || lastVisibleItemPosition[2] == itemCount - 1))
 //                    Log.d("AAA","We are at the very bottom!")
